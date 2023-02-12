@@ -1,27 +1,40 @@
-import React from 'react';
-import './App.scss';
+import {
+  FC,
+  useContext,
+  useEffect,
+} from 'react';
 
-interface Props {
-  onClick: () => void;
-}
+import {
+  Navigate,
+  Route,
+  Routes,
+} from 'react-router-dom';
 
-export const Provider: React.FC<Props> = React.memo(
-  ({ onClick, children }) => (
-    <button
-      type="button"
-      onClick={onClick}
-    >
-      {children}
-    </button>
-  ),
-);
+import { AuthContext } from './context/AuthContext';
+import { AuthForm } from './components/AuthForm';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { TodosPage } from './pages/TodosPage';
+import { User } from './types/User';
 
-export const App: React.FC = () => {
+export const App: FC = () => {
+  const { setUser } = useContext(AuthContext);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+
+    if (userData) {
+      const userFromLocalStorage = JSON.parse(userData) as User;
+
+      setUser(userFromLocalStorage);
+    }
+  }, []);
+
   return (
-    <div className="starter">
-      <Provider onClick={() => ({})}>
-        <TodoList />
-      </Provider>
-    </div>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<AuthForm />} />
+      <Route path="/todos" element={<TodosPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 };
